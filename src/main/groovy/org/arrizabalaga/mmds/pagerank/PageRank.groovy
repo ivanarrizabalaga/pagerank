@@ -2,20 +2,43 @@ package org.arrizabalaga.mmds.pagerank
 
 import Jama.Matrix
 
+/**
+ * A helper class for https://class.coursera.org/mmds-001
+ * @author arrizabalaga
+ *
+ */
 class PageRank { 
 	/**
 	 * Original data
 	 */
 	Map<String,List> data	
 	
+	/**
+	 * List node keys in order
+	 */
 	List<String> nodes
 
+	/**
+	 * M matrix
+	 */
 	Matrix m
 	
+	/**
+	 * r vector
+	 */
 	Matrix r
 
+	
 	Matrix betaVector
+	
+	/**
+	 * A matrix
+	 */
+	Matrix a
 
+	/**
+	 * The teleport coef.
+	 */
 	float beta
 	/**
 	 * data:
@@ -33,6 +56,7 @@ class PageRank {
 		this.nodes=data.keySet().toList()	
 		this.buildM()
 		this.buildBetaVector()
+		this.buildA()
 
 	}
 
@@ -57,11 +81,17 @@ class PageRank {
 		int n=this.nodes.size()
 		this.betaVector=new Matrix(n,1,(1-this.beta)/n)
 	} 
+	
+	private void buildA() {
+		int n=this.nodes.size()
+		double notBeta=1-this.beta
+		Matrix oneT=new Matrix(n,n,1/n)
+		this.a=this.m.times(this.beta) + oneT.times(notBeta)		
+	}
 
 	Matrix iterate (int t) {
 		Matrix result=this.r
 		t.times{
-			//result=this.m.times(result)
 			result=this.m.times(this.beta).times(result) + this.betaVector
 		}
 		return result
@@ -72,23 +102,10 @@ class PageRank {
 	}
 
 	String toString(){
-		String str=this.m.array*.toString().join("\n")
+		String strM=this.m.array*.toString().join("\n")
 		String strBetaVector=this.betaVector.array*.toString().join("\n")
-		"====PageRank====\ndata:\n$data\nm:\n$str\nbeta:\n${this.beta}\nbetaVector:\n${strBetaVector}\n=============="
+		String strA=this.a.array*.toString().join("\n")
+		"====PageRank====\ndata:\n$data\nm:\n$strM\nbeta:\n${this.beta}\nbetaVector:\n${strBetaVector}\na:\n$strA}=============="
 	}
-
-	String printEquations(){
-		String result=""
-		double[][] array=this.m.array
-		this.nodes.eachWithIndex{row,i->
-
-			"r_$row="+array[i]
-
-
-		}
-		return result
-	}
-
-
 	
 }
